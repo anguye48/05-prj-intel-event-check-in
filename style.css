@@ -244,13 +244,17 @@ button .fas {
 
 /* Messages */
 #greeting {
-  font-weight: 500;
+  display: block;
+  background: #eaf4ff;
+  color: #003c71;
+  padding: 14px 18px;
+  border-radius: 12px;
   font-size: 18px;
-  padding: 16px 20px;
-  border-radius: 8px;
-  color: #333;
+  font-weight: 600;
+  text-align: center;
   margin-bottom: 15px;
-  display: none;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+
 }
 
 .success-message {

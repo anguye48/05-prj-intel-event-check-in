@@ -1,14 +1,25 @@
-// Attendance goal
+// ======================================
+// Intel Sustainability Summit Check-In
+// ======================================
+
+// Attendance Goal
 const attendanceGoal = 50;
 
 // Counters
-let totalAttendees = 0;
-let waterCount = 0;
-let zeroCount = 0;
-let powerCount = 0;
+let totalAttendees = Number(localStorage.getItem("totalAttendees")) || 0;
+let waterCount = Number(localStorage.getItem("waterCount")) || 0;
+let zeroCount = Number(localStorage.getItem("zeroCount")) || 0;
+let powerCount = Number(localStorage.getItem("powerCount")) || 0;
 
-// Get HTML elements
+// Load attendee list from Local Storage
+let attendeeListData = JSON.parse(localStorage.getItem("attendeeList")) || [];
+
+// ======================================
+// Get HTML Elements
+// ======================================
+
 const form = document.getElementById("checkInForm");
+
 const greeting = document.getElementById("greeting");
 
 const attendeeCounter = document.getElementById("attendeeCount");
@@ -19,79 +30,175 @@ const powerDisplay = document.getElementById("powerCount");
 
 const progressBar = document.getElementById("progressBar");
 
-// Listen for form submission
+// ======================================
+// Create Attendee List (LevelUp)
+// ======================================
+
+// Creates the list automatically if it doesn't exist in HTML
+const attendeeSection = document.createElement("div");
+attendeeSection.innerHTML = `
+    <h3>Attendee List</h3>
+    <ul id="attendeeList"></ul>
+`;
+
+document.querySelector(".container").appendChild(attendeeSection);
+
+const attendeeList = document.getElementById("attendeeList");
+
+// ======================================
+// Load Saved Data
+// ======================================
+
+updateDisplay();
+
+attendeeListData.forEach(person => {
+    const item = document.createElement("li");
+    item.textContent = `${person.name} - ${person.team}`;
+    attendeeList.appendChild(item);
+});
+
+// ======================================
+// Listen for Form Submission
+// ======================================
+
 form.addEventListener("submit", function (event) {
 
-    // Prevent page refresh
     event.preventDefault();
 
-    // Get input values
-    const attendeeName = document.getElementById("attendeeName").value.trim();
-    const selectedTeam = document.getElementById("teamSelect").value;
+    // Get Input Values
+    const attendeeName =
+        document.getElementById("attendeeName").value.trim();
 
-    // Increase total attendance
+    const selectedTeam =
+        document.getElementById("teamSelect").value;
+
+    if (attendeeName === "") {
+        alert("Please enter your name.");
+        return;
+    }
+
+    // Increase Total Attendance
     totalAttendees++;
 
-    // Update total attendance on page
-    attendeeCounter.textContent = totalAttendees;
-
-    // Calculate progress percentage
-    const progress = (totalAttendees / attendanceGoal) * 100;
-
-    // Update progress bar
-    progressBar.style.width = progress + "%";
-
-    // Team counter logic
+    // Determine Team
     let teamName = "";
 
     if (selectedTeam === "water") {
+
         waterCount++;
-        waterDisplay.textContent = waterCount;
         teamName = "Team Water Wise";
-    }
 
-    else if (selectedTeam === "zero") {
+    } else if (selectedTeam === "zero") {
+
         zeroCount++;
-        zeroDisplay.textContent = zeroCount;
         teamName = "Team Net Zero";
-    }
 
-    else if (selectedTeam === "power") {
+    } else if (selectedTeam === "power") {
+
         powerCount++;
-        powerDisplay.textContent = powerCount;
         teamName = "Team Renewables";
+
     }
 
-    // Personalized greeting
+    // Greeting Message
     greeting.textContent =
-        "✅ Welcome " +
-        attendeeName +
-        "! You have checked in to " +
-        teamName +
-        ".";
+        `🎉 Welcome, ${attendeeName} from ${teamName}!`;
 
-    // Celebration when goal reached
+    // Add to Attendee List
+    attendeeListData.push({
+        name: attendeeName,
+        team: teamName
+    });
+
+    const item = document.createElement("li");
+    item.textContent = `${attendeeName} - ${teamName}`;
+    attendeeList.appendChild(item);
+
+    // Update Page
+    updateDisplay();
+
+    // Save Progress
+    saveData();
+
+    // Celebration
     if (totalAttendees >= attendanceGoal) {
 
-        let winningTeam = "";
+        let winner = "";
 
         if (waterCount >= zeroCount && waterCount >= powerCount) {
-            winningTeam = "Team Water Wise";
-        }
-        else if (zeroCount >= waterCount && zeroCount >= powerCount) {
-            winningTeam = "Team Net Zero";
-        }
-        else {
-            winningTeam = "Team Renewables";
+
+            winner = "Team Water Wise";
+
+        } else if (zeroCount >= waterCount && zeroCount >= powerCount) {
+
+            winner = "Team Net Zero";
+
+        } else {
+
+            winner = "Team Renewables";
+
         }
 
         alert(
-            "🎉 Attendance goal reached!\n\nWinning Team: " +
-            winningTeam
+            `🎉 Congratulations!\n\nAttendance Goal Reached!\n\nWinning Team: ${winner}`
         );
     }
 
-    // Reset form
+    // Reset Form
     form.reset();
 
 });
+
+// ======================================
+// Update Display
+// ======================================
+
+function updateDisplay() {
+
+    // Attendance Counter
+    attendeeCounter.textContent = totalAttendees;
+
+    // Team Counters
+    waterDisplay.textContent = waterCount;
+    zeroDisplay.textContent = zeroCount;
+    powerDisplay.textContent = powerCount;
+
+    // Progress Bar
+    const percent =
+        (totalAttendees / attendanceGoal) * 100;
+
+    progressBar.style.width = percent + "%";
+}
+
+// ======================================
+// Save Data
+// ======================================
+
+function saveData() {
+
+    localStorage.setItem(
+        "totalAttendees",
+        totalAttendees
+    );
+
+    localStorage.setItem(
+        "waterCount",
+        waterCount
+    );
+
+    localStorage.setItem(
+        "zeroCount",
+        zeroCount
+    );
+
+    localStorage.setItem(
+        "powerCount",
+        powerCount
+    );
+
+    localStorage.setItem(
+        "attendeeList",
+        JSON.stringify(attendeeListData)
+    );
+
+}
